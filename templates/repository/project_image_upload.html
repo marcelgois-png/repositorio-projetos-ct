@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar imagens | {{ project.name }} | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">{{ project.name }}</p>
+    <h1>Adicionar imagens à galeria</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ project.get_absolute_url }}#gallery"><i class="bi bi-arrow-left"></i> Voltar ao projeto</a>
+</section>
+
+<form method="post" enctype="multipart/form-data" class="form-panel" id="imageUploadForm">
+  {% csrf_token %}
+  <p class="text-muted">Selecione uma ou mais imagens (JPG, PNG ou WebP). Você pode adicionar uma legenda a cada uma antes de enviar.</p>
+
+  <div class="image-upload-area" id="imageUploadArea">
+    <i class="bi bi-images"></i>
+    <p>Clique ou arraste as imagens aqui</p>
+    <input type="file" id="imageFiles" name="image" accept=".jpg,.jpeg,.png,.webp" multiple>
+  </div>
+
+  <div id="imagePreviewList" class="image-preview-list"></div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" id="submitBtn" disabled><i class="bi bi-cloud-upload"></i> Enviar imagens</button>
+  </div>
+</form>
+
+<script>
+const area = document.getElementById('imageUploadArea');
+const input = document.getElementById('imageFiles');
+const previewList = document.getElementById('imagePreviewList');
+const submitBtn = document.getElementById('submitBtn');
+
+area.addEventListener('click', () => input.click());
+
+area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
+area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+area.addEventListener('drop', e => {
+  e.preventDefault();
+  area.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+input.addEventListener('change', () => handleFiles(input.files));
+
+function handleFiles(files) {
+  previewList.innerHTML = '';
+  if (!files.length) { submitBtn.disabled = true; return; }
+  Array.from(files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const item = document.createElement('div');
+      item.className = 'image-preview-item';
+      item.innerHTML = `
+        <img src="${e.target.result}" alt="">
+        <input type="text" name="caption" class="form-control form-control-sm" placeholder="Legenda (opcional)">
+      `;
+      previewList.appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+  submitBtn.disabled = false;
+}
+</script>
+{% endblock %}

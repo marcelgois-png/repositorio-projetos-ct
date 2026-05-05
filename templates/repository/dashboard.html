@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Painel interno</p>
+    <h1>Dashboard de acompanhamento</h1>
+    <p class="page-subtitle">Visão consolidada do portfólio de projetos, do andamento das entregas e dos pontos que exigem atenção da equipe.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'repository:project_list' %}"><i class="bi bi-arrow-left"></i> Voltar ao repositório</a>
+</section>
+
+<div class="dashboard-shell">
+  <section class="dashboard-kpi-grid" aria-label="Métricas do repositório">
+    <article class="dashboard-kpi-card">
+      <span>Total de projetos</span>
+      <strong>{{ summary.total_projects }}</strong>
+      <small>{{ summary.public_projects }} públicos e {{ summary.restricted_projects }} restritos</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Projetos com SIPAC</span>
+      <strong>{{ summary.with_sipac }}</strong>
+      <small>{{ summary.without_sipac }} ainda sem processo vinculado</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Atualizados em 30 dias</span>
+      <strong>{{ summary.updated_recently }}</strong>
+      <small>Acompanhamento recente da equipe</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Projetos com arquivos</span>
+      <strong>{{ summary.with_files }}</strong>
+      <small>{{ summary.without_files }} sem anexos técnicos</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Projetos com imagens</span>
+      <strong>{{ summary.with_images }}</strong>
+      <small>{{ summary.without_cover }} sem imagem de capa</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Projetos sem equipe</span>
+      <strong>{{ summary.without_team }}</strong>
+      <small>Média de {{ summary.avg_team_members }} integrantes por projeto</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Média de arquivos</span>
+      <strong>{{ summary.avg_files }}</strong>
+      <small>Arquivos por projeto cadastrado</small>
+    </article>
+    <article class="dashboard-kpi-card">
+      <span>Sem ano de início</span>
+      <strong>{{ summary.without_start_date }}</strong>
+      <small>Projetos que ainda precisam de data</small>
+    </article>
+  </section>
+
+  <section class="dashboard-panels-grid" aria-label="Gráficos do dashboard">
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Volume histórico</p>
+          <h2>Projetos por ano</h2>
+        </div>
+      </div>
+      <ul class="dashboard-bar-list">
+        {% for item in yearly_bars %}
+          <li class="dashboard-bar-item">
+            <div class="dashboard-bar-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="dashboard-bar-track"><span class="dashboard-bar-fill" style="width: {{ item.width }}%"></span></div>
+          </li>
+        {% empty %}
+          <li class="text-muted">Nenhum projeto com data de início informada.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Distribuição</p>
+          <h2>Projetos por status</h2>
+        </div>
+      </div>
+      <ul class="dashboard-bar-list">
+        {% for item in status_bars %}
+          <li class="dashboard-bar-item">
+            <div class="dashboard-bar-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="dashboard-bar-track"><span class="dashboard-bar-fill" style="width: {{ item.width }}%"></span></div>
+          </li>
+        {% empty %}
+          <li class="text-muted">Nenhum status encontrado.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Categorias</p>
+          <h2>Tipos de projeto</h2>
+        </div>
+      </div>
+      <ul class="dashboard-bar-list">
+        {% for item in category_bars %}
+          <li class="dashboard-bar-item">
+            <div class="dashboard-bar-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="dashboard-bar-track"><span class="dashboard-bar-fill" style="width: {{ item.width }}%"></span></div>
+          </li>
+        {% empty %}
+          <li class="text-muted">Nenhuma categoria vinculada a projetos.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Edificações</p>
+          <h2>Projetos por edificação</h2>
+        </div>
+      </div>
+      <ul class="dashboard-bar-list">
+        {% for item in building_bars %}
+          <li class="dashboard-bar-item">
+            <div class="dashboard-bar-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="dashboard-bar-track"><span class="dashboard-bar-fill" style="width: {{ item.width }}%"></span></div>
+          </li>
+        {% empty %}
+          <li class="text-muted">Nenhuma edificação associada a projetos.</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-wide">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Demandantes</p>
+          <h2>Projetos por demandante</h2>
+        </div>
+      </div>
+      <ul class="dashboard-bar-list">
+        {% for item in requested_by_bars %}
+          <li class="dashboard-bar-item">
+            <div class="dashboard-bar-label">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="dashboard-bar-track"><span class="dashboard-bar-fill" style="width: {{ item.width }}%"></span></div>
+          </li>
+        {% empty %}
+          <li class="text-muted">Nenhum demandante informado nos projetos.</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </section>
+
+  <section class="dashboard-panels-grid dashboard-panels-grid-bottom" aria-label="Listas de acompanhamento">
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Atualizações</p>
+          <h2>Projetos mais recentes</h2>
+        </div>
+      </div>
+      <div class="dashboard-list">
+        {% for project in recent_projects %}
+          <a class="dashboard-list-item" href="{{ project.get_absolute_url }}">
+            <span class="dashboard-list-cover">
+              {% if project.cover_image %}
+                <img src="{{ project.cover_image.url }}" alt="Capa do projeto {{ project.name }}">
+              {% else %}
+                <i class="bi bi-building"></i>
+              {% endif %}
+            </span>
+            <span class="dashboard-list-content">
+              <strong>{{ project.name }}</strong>
+              <span>{{ project.status_label }} · {{ project.updated_at|date:"d/m/Y" }} · {{ project.file_count }} arquivo{{ project.file_count|pluralize:"s" }}</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="text-muted">Nenhum projeto cadastrado.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Pendências</p>
+          <h2>Projetos sem arquivos</h2>
+        </div>
+      </div>
+      <div class="dashboard-list">
+        {% for project in projects_without_files %}
+          <a class="dashboard-list-item" href="{{ project.get_absolute_url }}">
+            <span class="dashboard-list-cover">
+              {% if project.cover_image %}
+                <img src="{{ project.cover_image.url }}" alt="Capa do projeto {{ project.name }}">
+              {% else %}
+                <i class="bi bi-building"></i>
+              {% endif %}
+            </span>
+            <span class="dashboard-list-content">
+              <strong>{{ project.name }}</strong>
+              <span>{{ project.status_label }} · atualizado em {{ project.updated_at|date:"d/m/Y" }}</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="text-muted">Todos os projetos têm arquivos cadastrados.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Pendências</p>
+          <h2>Projetos sem equipe</h2>
+        </div>
+      </div>
+      <div class="dashboard-list">
+        {% for project in projects_without_team %}
+          <a class="dashboard-list-item" href="{{ project.get_absolute_url }}">
+            <span class="dashboard-list-cover">
+              {% if project.cover_image %}
+                <img src="{{ project.cover_image.url }}" alt="Capa do projeto {{ project.name }}">
+              {% else %}
+                <i class="bi bi-building"></i>
+              {% endif %}
+            </span>
+            <span class="dashboard-list-content">
+              <strong>{{ project.name }}</strong>
+              <span>{{ project.status_label }} · {{ project.updated_at|date:"d/m/Y" }}</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="text-muted">Todos os projetos têm equipe vinculada.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel-scrollable">
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="eyebrow">Pendências</p>
+          <h2>Projetos sem SIPAC</h2>
+        </div>
+      </div>
+      <div class="dashboard-list">
+        {% for project in projects_without_sipac %}
+          <a class="dashboard-list-item" href="{{ project.get_absolute_url }}">
+            <span class="dashboard-list-cover">
+              {% if project.cover_image %}
+                <img src="{{ project.cover_image.url }}" alt="Capa do projeto {{ project.name }}">
+              {% else %}
+                <i class="bi bi-building"></i>
+              {% endif %}
+            </span>
+            <span class="dashboard-list-content">
+              <strong>{{ project.name }}</strong>
+              <span>{{ project.status_label }} · {{ project.updated_at|date:"d/m/Y" }}</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="text-muted">Todos os projetos já possuem processo SIPAC.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</div>
+{% endblock %}

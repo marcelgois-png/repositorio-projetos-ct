@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Arquivo do projeto</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ project.get_absolute_url }}#files"><i class="bi bi-arrow-left"></i> Voltar aos arquivos</a>
+</section>
+
+<form method="post" enctype="multipart/form-data" class="form-panel">
+  {% csrf_token %}
+  {% if project_file.file %}
+    <div class="current-file-box">
+      <span>Arquivo atual</span>
+      <strong>{{ project_file.original_filename }}</strong>
+      <small>{{ project_file.size_mb }}</small>
+    </div>
+  {% endif %}
+  {% include "repository/_form_fields.html" %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Salvar arquivo</button>
+  </div>
+</form>
+{% endblock %}

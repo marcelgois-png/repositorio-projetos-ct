@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+  <defs>
+    <filter id="recolor">
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 0.157
+                0 0 0 0 0.243
+                0 0 0 0 0.298
+                0 0 0 1 0"/>
+    </filter>
+  </defs>
+  <image href="logo-ct.png" width="100" height="100" filter="url(#recolor)"/>
+</svg>

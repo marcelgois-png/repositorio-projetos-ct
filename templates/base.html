@@ -1,0 +1,88 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Repositório de Projetos CT/UFPB{% endblock %}</title>
+  {% include "repository/_fallback_head.html" %}
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+  <link href="{% static 'css/app.css' %}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-identity">
+      {% block topbar_left_actions %}{% endblock %}
+      <a class="topbar-logo-link" href="https://www.ct.ufpb.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site do Centro de Tecnologia da UFPB">
+        <img class="topbar-logo" src="{% static 'img/logo-ct-12.png' %}" alt="Centro de Tecnologia da UFPB">
+      </a>
+      <a class="topbar-title" href="{% url 'repository:project_list' %}">Repositório de Propostas da Assessoria de Projetos Urbanísticos e Infraestrutura</a>
+    </div>
+    <nav class="topbar-actions" aria-label="Ações do usuário">
+      {% if request.user.is_authenticated %}
+        <a class="btn btn-sm btn-outline-light topbar-dashboard-link" href="{% url 'repository:dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+        <div class="dropdown">
+          <button class="user-menu-button" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i>
+            <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+            <i class="bi bi-chevron-down"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end topbar-dropdown">
+            {% if can_manage_repository %}
+              <a class="dropdown-item" href="{% url 'repository:people_list' %}"><i class="bi bi-people"></i> Pessoas</a>
+              <a class="dropdown-item" href="{% url 'repository:options_list' %}"><i class="bi bi-ui-checks-grid"></i> Opções</a>
+            {% endif %}
+            {% if can_manage_users %}
+              <a class="dropdown-item" href="{% url 'repository:users_list' %}"><i class="bi bi-shield-lock"></i> Usuários</a>
+              <a class="dropdown-item" href="/admin/"><i class="bi bi-sliders"></i> Admin Django</a>
+            {% endif %}
+            {% if can_manage_repository or can_manage_users %}
+              <hr class="dropdown-divider">
+            {% endif %}
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right"></i> Sair</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <a class="btn btn-sm btn-outline-light" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Entrar</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="main-content {% if not request.user.is_authenticated %}public-main{% endif %} {% block main_classes %}{% endblock %}">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+  <script>
+    if (document.querySelector('.glightbox') && typeof GLightbox !== 'undefined') {
+      GLightbox({ selector: '.glightbox', touchNavigation: true, loop: true });
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

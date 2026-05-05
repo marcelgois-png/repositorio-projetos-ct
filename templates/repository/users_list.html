@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Administração</p>
+    <h1>Usuários</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'repository:user_create' %}"><i class="bi bi-person-lock"></i> Novo usuário</a>
+</section>
+
+<form method="get" class="search-line">
+  <input class="form-control" name="q" value="{{ query }}" placeholder="Buscar por usuário, nome ou e-mail">
+  <button class="btn btn-secondary" type="submit"><i class="bi bi-search"></i></button>
+</form>
+
+<div class="table-responsive">
+  <table class="table repository-table align-middle">
+    <thead><tr><th>Usuário</th><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td><strong>{{ user.username }}</strong></td>
+          <td>{{ user.get_full_name|default:"-" }}</td>
+          <td>{{ user.email|default:"-" }}</td>
+          <td>{{ user.repository_profile.get_role_display|default:"Leitor" }}</td>
+          <td><span class="badge status-badge">{{ user.is_active|yesno:"Ativo,Inativo" }}</span></td>
+          <td class="text-end">
+            <div class="repository-row-actions">
+              <a class="action-btn acao-btn-ver" href="{% url 'repository:user_detail' user.pk %}" title="Ver usuário"><i class="bi bi-eye"></i></a>
+              <a class="action-btn acao-btn-lock" href="{% url 'repository:user_edit' user.pk %}" title="Editar usuário"><i class="bi bi-pencil"></i></a>
+              <form method="post" action="{% url 'repository:user_delete' user.pk %}" class="action-form" onsubmit="return confirm('Excluir usuário {{ user.username }}? Esta ação não poderá ser desfeita.');">
+                {% csrf_token %}
+                <button class="action-btn action-btn-delete" type="submit" title="Excluir usuário"><i class="bi bi-trash"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Nenhum usuário encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

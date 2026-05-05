@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Projetos | Repositório CT/UFPB{% endblock %}
+
+{% block topbar_left_actions %}
+  <button class="topbar-menu-button" type="button" data-catalog-sidebar-toggle data-catalog-sidebar-target="#projectFilters" aria-controls="projectFilters" aria-expanded="true" aria-label="Alternar filtros">
+    <i class="bi bi-list"></i>
+  </button>
+{% endblock %}
+
+{% block main_classes %}catalog-main{% endblock %}
+
+{% block content %}
+{% if can_edit %}
+  <section class="catalog-toolbar" aria-label="Ações do catálogo">
+    <a class="btn btn-primary" href="{% url 'repository:project_create' %}"><i class="bi bi-plus-lg"></i> Novo projeto</a>
+  </section>
+{% endif %}
+
+<section class="catalog-notice" aria-label="Observação sobre os projetos da assessoria">
+  <i class="bi bi-info-circle"></i>
+  <div>
+    <h2>Projetos em fase preliminar</h2>
+    <p>Os projetos da Assessoria de Projetos Urbanísticos e Infraestrutura são de fase preliminar e devem ser validados pela SINFRA com todos os elementos necessários para processo administrativo ou licitatório. A execução também depende da disponibilidade de recursos orçamentários.</p>
+  </div>
+</section>
+
+<div class="catalog-layout">
+  <aside class="offcanvas-lg offcanvas-start filter-drawer catalog-filter-sidebar" tabindex="-1" id="projectFilters" aria-labelledby="projectFiltersLabel">
+    <div class="offcanvas-header">
+      <h2 class="offcanvas-title" id="projectFiltersLabel">Filtrar projetos</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#projectFilters" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <form method="get" class="filter-form">
+        <div class="filter-stack">
+          <div>{{ filters.q.label_tag }}{{ filters.q }}</div>
+          <div>{{ filters.category_discipline.label_tag }}{{ filters.category_discipline }}</div>
+          <div>{{ filters.status.label_tag }}{{ filters.status }}</div>
+          <div>{{ filters.building.label_tag }}{{ filters.building }}</div>
+          <div>{{ filters.requested_by.label_tag }}{{ filters.requested_by }}</div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+          <a class="btn btn-outline-secondary" href="{% url 'repository:project_list' %}"><i class="bi bi-x-lg"></i> Limpar filtros</a>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  {% if active_filters %}
+    <section class="active-filter-band" aria-label="Filtros ativos">
+      <div>
+        <span class="active-filter-title">Filtros ativos</span>
+        <div class="active-filter-list">
+          {% for filter in active_filters %}
+            <span class="active-filter-chip">
+              <strong>{{ filter.label }}:</strong> {{ filter.value }}
+              <a class="active-filter-remove" href="{{ filter.remove_url }}" aria-label="Remover filtro {{ filter.label }} {{ filter.value }}">
+                <i class="bi bi-x"></i>
+              </a>
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'repository:project_list' %}"><i class="bi bi-x-lg"></i> Limpar</a>
+    </section>
+  {% endif %}
+
+  <section class="project-grid" aria-label="Lista de projetos">
+    {% for project in projects %}
+      <article class="project-card">
+        <a class="project-cover" href="{{ project.get_absolute_url }}" aria-label="Abrir {{ project.name }}">
+          {% if project.cover_image %}
+            <img src="{{ project.cover_image.url }}" alt="Imagem do projeto {{ project.name }}">
+          {% else %}
+            <span><i class="bi bi-building"></i></span>
+          {% endif %}
+          {% if project.year_range %}
+            <span class="project-image-badge project-years-badge">{{ project.year_range }}</span>
+          {% endif %}
+          <span class="project-image-badge project-status-badge">{{ project.status_label }}</span>
+        </a>
+        <div class="project-card-body">
+          <h2><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></h2>
+          <p>{{ project.description|truncatewords:28 }}</p>
+          <div class="badge-row">
+            {% for category in project.categories.all|slice:":4" %}
+              <span class="tag" style="--tag-color: {{ category.color }}">{{ category.name }}</span>
+            {% empty %}
+              <span class="tag muted">Sem categoria</span>
+            {% endfor %}
+          </div>
+          <dl class="project-meta">
+            {% if project.building_name %}
+              <div class="project-location-meta">
+                <dt><i class="bi bi-building"></i> Local</dt>
+                <dd>{{ project.building_name }}</dd>
+              </div>
+            {% endif %}
+            <div class="project-file-meta">
+              <dt><i class="bi bi-paperclip"></i> Arquivos</dt>
+              <dd>{{ project.file_count }}</dd>
+            </div>
+            {% if project.sipac_url %}
+              <div class="project-sipac-meta">
+                <dt><i class="bi bi-link-45deg"></i> SIPAC</dt>
+                <dd><a href="{{ project.sipac_url }}" target="_blank" rel="noopener noreferrer" title="Abrir processo no SIPAC">Abrir</a></dd>
+              </div>
+            {% endif %}
+          </dl>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state">
+        <i class="bi bi-folder2-open"></i>
+        <h2>Nenhum projeto encontrado</h2>
+        <p>Ajuste os filtros ou cadastre o primeiro projeto do repositório.</p>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

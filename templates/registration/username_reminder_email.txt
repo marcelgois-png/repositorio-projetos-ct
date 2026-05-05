@@ -1,0 +1,16 @@
+Olá,
+
+Recebemos uma solicitação para lembrar o usuário vinculado a este e-mail no Repositório de Projetos Arquitetônicos.
+
+Usuário(s) cadastrado(s):
+{% for user in users %}
+- {{ user.username }}
+{% endfor %}
+
+Acesse o sistema:
+{{ login_url }}
+
+Se você não solicitou essa informação, ignore este e-mail.
+
+Atenciosamente,
+Repositório de Projetos Arquitetônicos CT/UFPB

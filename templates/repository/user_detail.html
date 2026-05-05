@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ managed_user.username }} | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Administração</p>
+    <h1>{{ managed_user.username }}</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'repository:users_list' %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+    <a class="btn btn-primary" href="{% url 'repository:user_edit' managed_user.pk %}"><i class="bi bi-pencil"></i> Editar usuário</a>
+  </div>
+</section>
+
+<section class="detail-block">
+  <h2>Dados do usuário</h2>
+  <dl class="info-grid">
+    <div><dt>Usuário</dt><dd>{{ managed_user.username }}</dd></div>
+    <div><dt>Nome</dt><dd>{{ managed_user.get_full_name|default:"-" }}</dd></div>
+    <div><dt>E-mail</dt><dd>{{ managed_user.email|default:"-" }}</dd></div>
+    <div><dt>Perfil</dt><dd>{{ managed_user.repository_profile.get_role_display|default:"Leitor" }}</dd></div>
+    <div><dt>Status</dt><dd>{{ managed_user.is_active|yesno:"Ativo,Inativo" }}</dd></div>
+    <div><dt>Superusuário</dt><dd>{{ managed_user.is_superuser|yesno:"Sim,Não" }}</dd></div>
+    <div><dt>Equipe vinculada</dt><dd>{{ managed_user.repository_person.name|default:"-" }}</dd></div>
+    <div><dt>Último login</dt><dd>{{ managed_user.last_login|date:"d/m/Y H:i"|default:"-" }}</dd></div>
+    <div><dt>Criado em</dt><dd>{{ managed_user.date_joined|date:"d/m/Y H:i"|default:"-" }}</dd></div>
+  </dl>
+</section>
+{% endblock %}

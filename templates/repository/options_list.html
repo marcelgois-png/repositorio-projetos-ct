@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Opções do cadastro | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Administração do repositório</p>
+    <h1>Opções do cadastro</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'repository:project_list' %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+</section>
+
+<section class="options-grid">
+  <article class="option-card">
+    <h2>Edificações</h2>
+    <form method="post" class="option-form">
+      {% csrf_token %}
+      <input type="hidden" name="option_kind" value="building">
+      {% include "repository/_form_fields.html" with form=building_form %}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg"></i> Adicionar edificação</button>
+    </form>
+    <div class="option-list">
+      {% for building in buildings %}
+        <div class="option-row">
+          <div>
+            <strong>{{ building.name }}</strong>
+            <span>{{ building.project_count }} projeto{{ building.project_count|pluralize }}</span>
+          </div>
+          <div class="option-row-actions">
+            <a class="action-btn acao-btn-ver" href="{% url 'repository:option_edit' 'edificacoes' building.pk %}" title="Editar edificação"><i class="bi bi-pencil"></i></a>
+            <form method="post" action="{% url 'repository:option_delete' 'edificacoes' building.pk %}" onsubmit="return confirm('Excluir edificação {{ building.name }}?')">
+              {% csrf_token %}
+              <button class="action-btn action-btn-delete" type="submit" title="Excluir edificação"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">Nenhuma edificação cadastrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="option-card">
+    <h2>Status de projeto</h2>
+    <form method="post" class="option-form">
+      {% csrf_token %}
+      <input type="hidden" name="option_kind" value="status">
+      {% include "repository/_form_fields.html" with form=status_form %}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg"></i> Adicionar status</button>
+    </form>
+    <div class="option-list">
+      {% for status in statuses %}
+        <div class="option-row">
+          <div>
+            <strong>{{ status.name }}</strong>
+            <span>{{ status.code }}{% if status.requires_end_date %} · exige conclusão{% endif %}</span>
+          </div>
+          <div class="option-row-actions">
+            <a class="action-btn acao-btn-ver" href="{% url 'repository:option_edit' 'status' status.pk %}" title="Editar status"><i class="bi bi-pencil"></i></a>
+            <form method="post" action="{% url 'repository:option_delete' 'status' status.pk %}" onsubmit="return confirm('Excluir status {{ status.name }}?')">
+              {% csrf_token %}
+              <button class="action-btn action-btn-delete" type="submit" title="Excluir status"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">Nenhum status cadastrado.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="option-card">
+    <h2>Categorias</h2>
+    <form method="post" class="option-form">
+      {% csrf_token %}
+      <input type="hidden" name="option_kind" value="category">
+      {% include "repository/_form_fields.html" with form=category_form %}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg"></i> Adicionar categoria</button>
+    </form>
+    <div class="option-list">
+      {% for category in categories %}
+        <div class="option-row">
+          <div>
+            <strong><span class="option-color" style="--option-color: {{ category.color }}"></span>{{ category.name }}</strong>
+            <span>{{ category.project_count }} projeto{{ category.project_count|pluralize }}</span>
+          </div>
+          <div class="option-row-actions">
+            <a class="action-btn acao-btn-ver" href="{% url 'repository:option_edit' 'categorias' category.pk %}" title="Editar categoria"><i class="bi bi-pencil"></i></a>
+            <form method="post" action="{% url 'repository:option_delete' 'categorias' category.pk %}" onsubmit="return confirm('Excluir categoria {{ category.name }}?')">
+              {% csrf_token %}
+              <button class="action-btn action-btn-delete" type="submit" title="Excluir categoria"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">Nenhuma categoria cadastrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

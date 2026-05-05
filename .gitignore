@@ -1,0 +1,14 @@
+.env
+.claude/
+.venv/
+__pycache__/
+*.py[cod]
+db.sqlite3
+staticfiles/
+media/
+private_media/
+.test_private_media/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log

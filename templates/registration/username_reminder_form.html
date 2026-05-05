@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Recuperar usuário | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="login-shell">
+  <div class="login-panel">
+    <div class="auth-page-heading">
+      <h1>Recuperar usuário</h1>
+      <p>Informe o e-mail cadastrado para receber seu nome de usuário.</p>
+    </div>
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      {% include "repository/_form_fields.html" %}
+      <button class="btn btn-primary w-100" type="submit"><i class="bi bi-envelope"></i> Enviar usuário</button>
+    </form>
+    <a class="catalog-link" href="{% url 'login' %}"><i class="bi bi-arrow-left"></i> Voltar ao login</a>
+  </div>
+</section>
+{% endblock %}

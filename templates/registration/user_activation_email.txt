@@ -1,0 +1,12 @@
+Ola, {{ user.get_full_name|default:user.username }}.
+
+Foi criado um acesso para voce no Repositorio de Projetos Arquitetonicos CT/UFPB.
+
+Use o link abaixo para validar seu cadastro e definir sua senha. O link e valido por {{ valid_hours }} hora:
+
+{{ activation_url }}
+
+Se voce nao esperava este convite, ignore este e-mail.
+
+Atenciosamente,
+Repositorio de Projetos Arquitetonicos CT/UFPB

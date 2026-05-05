@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Ativar acesso | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="login-shell">
+  <div class="login-panel">
+    {% if validlink %}
+      <div class="auth-page-heading">
+        <h1>Validar cadastro</h1>
+        <p>Defina sua senha para ativar o acesso ao repositório.</p>
+      </div>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        {% include "repository/_form_fields.html" %}
+        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check-lg"></i> Validar cadastro</button>
+      </form>
+    {% else %}
+      <div class="auth-page-heading">
+        <h1>Link inválido ou expirado</h1>
+        <p>Solicite à administração um novo convite. Cada link é válido por 1 hora.</p>
+      </div>
+      <a class="btn btn-primary w-100" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Ir para login</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,101 @@
+x-django-env: &django-env
+  DJANGO_DEBUG: 0
+  MYSQL_HOST: mysql
+  MYSQL_PORT: 3306
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  app-init:
+    build: .
+    image: repositorio-projetos-ct:prod
+    restart: "no"
+    env_file:
+      - .env
+    environment: *django-env
+    command: ["init"]
+    volumes:
+      - media_data:/app/media
+      - private_media_data:/app/private_media
+      - staticfiles_data:/app/staticfiles
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  web:
+    build: .
+    image: repositorio-projetos-ct:prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment: *django-env
+    command:
+      - gunicorn
+      - config.wsgi:application
+      - --bind
+      - 0.0.0.0:8000
+      - --workers
+      - ${GUNICORN_WORKERS:-3}
+      - --timeout
+      - ${GUNICORN_TIMEOUT:-60}
+      - --access-logfile
+      - "-"
+      - --error-logfile
+      - "-"
+    volumes:
+      - media_data:/app/media
+      - private_media_data:/app/private_media
+      - staticfiles_data:/app/staticfiles
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8000/healthz/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app-init:
+        condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - media_data:/app/media:ro
+      - staticfiles_data:/app/staticfiles:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/nginx-health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  media_data:
+  private_media_data:
+  staticfiles_data:

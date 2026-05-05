@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="project-hero {% if project.cover_image %}with-cover{% endif %}" {% if project.cover_image %}style="background-image: linear-gradient(90deg, rgba(40, 62, 76, .88), rgba(40, 62, 76, .52)), url('{{ project.cover_image.url }}')"{% endif %}>
+  <div class="project-hero-content">
+    <p class="eyebrow">{{ project.get_visibility_display }}</p>
+    <h1>{{ project.name }}</h1>
+    <div class="hero-actions">
+      {% if can_edit %}
+        <a class="btn btn-light" href="{% url 'repository:project_edit' project.slug %}"><i class="bi bi-pencil"></i> Editar</a>
+      {% endif %}
+      <a class="btn btn-outline-light" href="{% url 'repository:project_list' %}"><i class="bi bi-arrow-left"></i> Voltar ao catálogo</a>
+    </div>
+  </div>
+</section>
+
+<section class="detail-layout">
+  <div class="detail-main detail-stack">
+      <section class="detail-block" id="overview">
+        <h2>Informações do projeto</h2>
+        <div class="project-summary">
+          <h3>Resumo</h3>
+          <p>{{ project.description|linebreaksbr }}</p>
+        </div>
+        <dl class="info-grid">
+          <div><dt>Data de início</dt><dd>{{ project.start_date|date:"d/m/Y"|default:"-" }}</dd></div>
+          <div><dt>Data de conclusão</dt><dd>{{ project.end_date|date:"d/m/Y"|default:"-" }}</dd></div>
+          <div><dt>Data de edição</dt><dd>{{ project.updated_at|date:"d/m/Y" }}</dd></div>
+          <div><dt>Status</dt><dd>{{ project.status_label }}</dd></div>
+          <div><dt>Edificação</dt><dd>{{ project.building_name|default:"-" }}</dd></div>
+          <div><dt>Demandante do projeto</dt><dd>{{ project.requested_by|default:"-" }}</dd></div>
+          {% if project.sipac_url %}
+            <div><dt>Processo SIPAC</dt><dd><a href="{{ project.sipac_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-link-45deg"></i> Abrir processo</a></dd></div>
+          {% endif %}
+        </dl>
+        <h3>Categorias</h3>
+        <div class="badge-row">
+          {% for category in project.categories.all %}
+            <span class="tag" style="--tag-color: {{ category.color }}">{{ category.name }}</span>
+          {% empty %}
+            <span class="tag muted">Sem categoria</span>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="detail-block" id="gallery">
+        <div class="section-title-row">
+          <h2>Galeria de imagens</h2>
+          {% if can_edit %}
+            <div class="section-title-actions">
+              <a class="btn btn-sm btn-primary" href="{% url 'repository:project_image_upload' project.slug %}"><i class="bi bi-plus-lg"></i> Adicionar imagens</a>
+            </div>
+          {% endif %}
+        </div>
+        {% if images %}
+          <div class="project-gallery">
+            {% for img in images %}
+              <div class="gallery-item">
+                <a href="{{ img.image.url }}" class="glightbox" data-gallery="project-gallery" data-description="{{ img.caption }}">
+                  <img src="{{ img.image.url }}" alt="{{ img.caption|default:project.name }}">
+                </a>
+                {% if img.caption %}<p class="gallery-caption">{{ img.caption }}</p>{% endif %}
+                {% if can_edit %}
+                  <form method="post" action="{% url 'repository:project_image_delete' project.slug img.pk %}" class="gallery-delete-form" onsubmit="return confirm('Remover esta imagem?')">
+                    {% csrf_token %}
+                    <button class="gallery-delete-btn" type="submit" title="Remover imagem"><i class="bi bi-trash"></i></button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Nenhuma imagem cadastrada.{% if can_edit %} <a href="{% url 'repository:project_image_upload' project.slug %}">Adicionar imagens</a>.{% endif %}</p>
+        {% endif %}
+      </section>
+
+      <section class="detail-block" id="files">
+        <div class="section-title-row files-title-row">
+          <h2>Arquivos do projeto</h2>
+          <div class="section-title-actions">
+            {% if can_edit %}
+              <a class="btn btn-sm btn-primary" href="{% url 'repository:project_file_upload' project.slug %}"><i class="bi bi-plus-lg"></i> Novo arquivo</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle repository-table project-files-table">
+            <colgroup>
+              <col class="project-files-col-main">
+              <col class="project-files-col-equal">
+              <col class="project-files-col-equal">
+              <col class="project-files-col-equal">
+              <col class="project-files-col-equal">
+              <col class="project-files-col-equal">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Arquivo</th>
+                <th>Tipo</th>
+                <th>Data</th>
+                <th>Versão</th>
+                <th>Responsável</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for file in files %}
+                <tr>
+                  <td>
+                    <div class="project-file-cell">
+                      <strong class="project-file-title">{{ file.title }}</strong>
+                      <span class="project-file-description">{{ file.display_filename }} · {{ file.size_mb }}</span>
+                      {% if file.description %}<span class="project-file-notes">{{ file.description }}</span>{% endif %}
+                    </div>
+                  </td>
+                  <td>{{ file.get_file_type_display }}</td>
+                  <td>{{ file.uploaded_at|date:"d/m/Y" }}</td>
+                  <td>{{ file.version }}</td>
+                  <td>{{ file.responsible|default:"-" }}</td>
+                  <td class="text-end">
+                    <div class="repository-row-actions">
+                      {% if can_edit %}
+                        <a class="action-btn acao-btn-ver" href="{% url 'repository:project_file_edit' file.pk %}" title="Editar arquivo"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{% url 'repository:project_file_delete' file.pk %}" class="action-form" onsubmit="return confirm('Excluir este arquivo do projeto? Esta ação não poderá ser desfeita.');">
+                          {% csrf_token %}
+                          <button class="action-btn acao-btn-del" type="submit" title="Excluir arquivo"><i class="bi bi-trash"></i></button>
+                        </form>
+                      {% endif %}
+                      {% if can_download %}
+                        <a class="action-btn acao-btn-ver" href="{% url 'repository:project_file_download' file.pk %}" title="Baixar arquivo"><i class="bi bi-download"></i></a>
+                      {% elif not request.user.is_authenticated %}
+                        <span class="text-muted small">Download pÃºblico apÃ³s finalizaÃ§Ã£o</span>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Nenhum arquivo cadastrado.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="detail-block" id="team">
+        <div class="section-title-row detail-section-title-row">
+          <h2>Equipe de elaboração</h2>
+          <div class="section-title-actions">
+            {% if can_edit %}
+              <a class="btn btn-sm btn-primary" href="{% url 'repository:project_member_add' project.slug %}"><i class="bi bi-plus-lg"></i> Novo Membro</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="team-list">
+          {% for membership in project.memberships.all %}
+            <div class="team-row">
+              <div class="avatar">{{ membership.person.name|first }}</div>
+              <div>
+                <strong>{{ membership.person.name }}</strong>
+                <span>{{ membership.get_role_display }}{% if membership.responsibility %} · {{ membership.responsibility }}{% endif %}</span>
+              </div>
+              {% if can_edit %}
+                <form method="post" action="{% url 'repository:project_member_delete' project.slug membership.pk %}">
+                  {% csrf_token %}
+                  <button class="action-btn acao-btn-del" type="submit" title="Remover integrante"><i class="bi bi-trash"></i></button>
+                </form>
+              {% endif %}
+            </div>
+          {% empty %}
+            <p class="text-muted">Nenhuma pessoa vinculada a este projeto.</p>
+          {% endfor %}
+        </div>
+      </section>
+  </div>
+</section>
+{% endblock %}

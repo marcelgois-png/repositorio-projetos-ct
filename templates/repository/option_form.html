@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | Repositório CT/UFPB{% endblock %}
+
+{% block content %}
+<section class="page-header compact">
+  <div>
+    <p class="eyebrow">Opções do cadastro</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'repository:options_list' %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+</section>
+
+<form method="post" class="form-panel">
+  {% csrf_token %}
+  {% include "repository/_form_fields.html" %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Salvar opção</button>
+  </div>
+</form>
+{% endblock %}
