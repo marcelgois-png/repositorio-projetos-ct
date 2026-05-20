@@ -13,6 +13,7 @@ urlpatterns = [
     path("projetos/novo/", views.project_create, name="project_create"),
     path("projetos/<slug:slug>/", views.project_detail, name="project_detail"),
     path("projetos/<slug:slug>/editar/", views.project_edit, name="project_edit"),
+    path("projetos/<slug:slug>/excluir/", views.project_delete, name="project_delete"),
     path("projetos/<slug:slug>/arquivos/novo/", views.project_file_upload, name="project_file_upload"),
     path("projetos/<slug:slug>/equipe/novo/", views.project_member_add, name="project_member_add"),
     path("projetos/<slug:slug>/equipe/<int:pk>/remover/", views.project_member_delete, name="project_member_delete"),
@@ -31,6 +32,7 @@ urlpatterns = [
     path("usuarios/novo/", views.user_create, name="user_create"),
     path("usuarios/ativar/<path:token>/", views.user_activate, name="user_activate"),
     path("usuarios/<int:pk>/", views.user_detail, name="user_detail"),
+    path("usuarios/<int:pk>/reenviar-convite/", views.user_resend_invitation, name="user_resend_invitation"),
     path("usuarios/<int:pk>/editar/", views.user_edit, name="user_edit"),
     path("usuarios/<int:pk>/excluir/", views.user_delete, name="user_delete"),
 ]

@@ -58,6 +58,18 @@
       {% for error in form.sipac_url.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
     </div>
 
+    <div class="project-field form-span-5">
+      <label class="form-label" for="{{ form.planeja_name.id_for_label }}">{{ form.planeja_name.label }}</label>
+      {{ form.planeja_name }}
+      {% for error in form.planeja_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="project-field form-span-7">
+      <label class="form-label" for="{{ form.planeja_url.id_for_label }}">{{ form.planeja_url.label }}</label>
+      {{ form.planeja_url }}
+      {% for error in form.planeja_url.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+
     <div class="project-field form-span-4 project-date-status-row">
       <label class="form-label" for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
       {{ form.start_date }}

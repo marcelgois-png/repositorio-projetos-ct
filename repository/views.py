@@ -226,6 +226,7 @@ def project_detail(request, slug):
         "files": files,
         "images": images,
         "can_edit": is_team_user(request.user),
+        "can_delete": is_admin_user(request.user),
         "can_download": request.user.is_authenticated or project.allows_public_download,
     }
     return render(request, "repository/project_detail.html", context)
@@ -348,6 +349,27 @@ def project_edit(request, slug):
         messages.success(request, "Projeto atualizado.")
         return redirect(project)
     return render(request, "repository/project_form.html", {"form": form, "project": project, "title": "Editar projeto"})
+
+
+@login_required
+def project_delete(request, slug):
+    require_admin(request.user)
+    project = get_object_or_404(Project, slug=slug)
+    if request.method != "POST":
+        raise PermissionDenied("Use POST para excluir projetos.")
+
+    name = project.name
+    for project_file in project.files.all():
+        if project_file.file:
+            project_file.file.delete(save=False)
+    for image in project.images.all():
+        if image.image:
+            image.image.delete(save=False)
+    if project.cover_image:
+        project.cover_image.delete(save=False)
+    project.delete()
+    messages.success(request, f"Projeto excluído: {name}.")
+    return redirect("repository:project_list")
 
 
 @login_required
@@ -671,6 +693,26 @@ def user_create(request):
         messages.success(request, "Usuário criado.")
         return redirect("repository:users_list")
     return render(request, "repository/user_form.html", {"form": form, "title": "Novo usuário"})
+
+
+@login_required
+def user_resend_invitation(request, pk):
+    require_admin(request.user)
+    managed_user = get_object_or_404(User, pk=pk)
+    if request.method != "POST":
+        raise PermissionDenied("Use POST para reenviar convites.")
+
+    if managed_user.is_active:
+        messages.info(request, f"Usuário {managed_user.get_username()} já está ativo — convite não enviado.")
+        return redirect("repository:user_detail", pk=managed_user.pk)
+
+    if not managed_user.email:
+        messages.error(request, "Usuário sem e-mail cadastrado: edite o cadastro antes de reenviar o convite.")
+        return redirect("repository:user_detail", pk=managed_user.pk)
+
+    send_user_activation_email(request, managed_user)
+    messages.success(request, f"Novo convite enviado para {managed_user.email}.")
+    return redirect("repository:user_detail", pk=managed_user.pk)
 
 
 def user_activate(request, token):

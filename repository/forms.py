@@ -97,6 +97,8 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             "building",
             "requested_by",
             "sipac_url",
+            "planeja_name",
+            "planeja_url",
             "start_date",
             "end_date",
             "status",
@@ -108,6 +110,8 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             "building": "Edificação",
             "requested_by": "Demandante do projeto",
             "sipac_url": "Link do processo no SIPAC",
+            "planeja_name": "Nome do projeto no Planeja",
+            "planeja_url": "Link do projeto no Planeja",
         }
         widgets = {
             "description": forms.Textarea(attrs={"rows": 5}),
@@ -132,6 +136,8 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
         self.fields["status"].choices = project_status_choices(current_status)
         self.fields["status"].widget.attrs["data-project-status"] = "true"
         self.fields["sipac_url"].widget.attrs["placeholder"] = "https://sipac.ufpb.br/..."
+        self.fields["planeja_name"].widget.attrs["placeholder"] = "Ex.: Nome do projeto cadastrado no Planeja"
+        self.fields["planeja_url"].widget.attrs["placeholder"] = "https://planeja.ufpb.br/..."
 
         if self.instance.pk:
             self.fields["categories"].queryset = Category.objects.filter(Q(is_active=True) | Q(projects=self.instance)).distinct()

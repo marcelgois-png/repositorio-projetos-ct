@@ -30,6 +30,12 @@
           <td class="text-end">
             <div class="repository-row-actions">
               <a class="action-btn acao-btn-ver" href="{% url 'repository:user_detail' user.pk %}" title="Ver usuário"><i class="bi bi-eye"></i></a>
+              {% if not user.is_active %}
+                <form method="post" action="{% url 'repository:user_resend_invitation' user.pk %}" class="action-form" onsubmit="return confirm('Reenviar convite para {{ user.email|default:user.username }}?');">
+                  {% csrf_token %}
+                  <button class="action-btn acao-btn-ver" type="submit" title="Reenviar convite"><i class="bi bi-envelope-arrow-up"></i></button>
+                </form>
+              {% endif %}
               <a class="action-btn acao-btn-lock" href="{% url 'repository:user_edit' user.pk %}" title="Editar usuário"><i class="bi bi-pencil"></i></a>
               <form method="post" action="{% url 'repository:user_delete' user.pk %}" class="action-form" onsubmit="return confirm('Excluir usuário {{ user.username }}? Esta ação não poderá ser desfeita.');">
                 {% csrf_token %}

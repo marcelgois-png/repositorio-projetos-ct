@@ -220,6 +220,8 @@ class Project(models.Model):
     location = models.CharField("localização/unidade", max_length=220, blank=True)
     requested_by = models.CharField("demandante", max_length=220, blank=True)
     sipac_url = models.URLField("link do processo no SIPAC", blank=True)
+    planeja_name = models.CharField("nome do projeto no Planeja", max_length=220, blank=True)
+    planeja_url = models.URLField("link do projeto no Planeja", blank=True)
     start_date = models.DateField("data de início", null=True, blank=True)
     end_date = models.DateField("data de conclusão", null=True, blank=True)
     status = models.CharField("status", max_length=40, default=Status.IN_PROGRESS)
