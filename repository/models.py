@@ -66,16 +66,26 @@ def validate_upload_size(value):
         raise ValidationError(f"O arquivo excede o limite de {settings.MAX_UPLOAD_MB} MB.")
 
 
+# Slugs can be up to 240 chars, but the file/image columns cap paths at
+# max_length=200. Trim the slug used in upload paths so the generated path
+# always fits; otherwise Django raises SuspiciousFileOperation on save.
+UPLOAD_PATH_SLUG_MAX_LENGTH = 100
+
+
+def _upload_path_slug(slug):
+    return slug[:UPLOAD_PATH_SLUG_MAX_LENGTH].rstrip("-") or "projeto"
+
+
 def project_cover_upload_path(instance, filename):
     extension = Path(filename).suffix.lower()
-    slug = instance.slug or slugify(instance.name) or "projeto"
+    slug = _upload_path_slug(instance.slug or slugify(instance.name) or "projeto")
     return f"project_covers/{slug}/{uuid.uuid4().hex}{extension}"
 
 
 def project_file_upload_path(instance, filename):
     extension = Path(filename).suffix.lower()
-    project_slug = instance.project.slug or slugify(instance.project.name) or "projeto"
-    return f"project_files/{project_slug}/{uuid.uuid4().hex}{extension}"
+    slug = _upload_path_slug(instance.project.slug or slugify(instance.project.name) or "projeto")
+    return f"project_files/{slug}/{uuid.uuid4().hex}{extension}"
 
 
 class UserProfile(models.Model):
@@ -206,6 +216,7 @@ class Project(models.Model):
     cover_image = models.ImageField(
         "imagem de capa",
         upload_to=project_cover_upload_path,
+        max_length=200,
         blank=True,
         validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
     )
@@ -371,6 +382,7 @@ class ProjectFile(models.Model):
         "arquivo",
         upload_to=project_file_upload_path,
         storage=private_storage,
+        max_length=200,
         validators=[validate_project_file_extension, validate_upload_size],
     )
     file_type = models.CharField("tipo", max_length=40, choices=FileType.choices)
@@ -439,8 +451,8 @@ class ProjectFile(models.Model):
 
 def project_image_upload_path(instance, filename):
     extension = Path(filename).suffix.lower()
-    project_slug = instance.project.slug or slugify(instance.project.name) or "projeto"
-    return f"project_images/{project_slug}/{uuid.uuid4().hex}{extension}"
+    slug = _upload_path_slug(instance.project.slug or slugify(instance.project.name) or "projeto")
+    return f"project_images/{slug}/{uuid.uuid4().hex}{extension}"
 
 
 class ProjectImage(models.Model):
@@ -448,6 +460,7 @@ class ProjectImage(models.Model):
     image = models.ImageField(
         "imagem",
         upload_to=project_image_upload_path,
+        max_length=200,
         validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
     )
     caption = models.CharField("legenda", max_length=220, blank=True)
